@@ -7,7 +7,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-:root {
+/* :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -41,9 +41,67 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+} */
+
+:root {
+  /* LIGHT – tło, tekst, karty */
+  --background: oklch(0.97 0.02 95);       /* jasne, lekko ciepłe tło */
+  --foreground: oklch(0.19 0.03 50);      /* ciemny, neutralny tekst */
+
+  --card: oklch(1 0 0);                   /* karty prawie białe */
+  --card-foreground: oklch(0.19 0.03 50);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.19 0.03 50);
+
+  /* PRIMARY – zieleń lasu */
+  --primary: oklch(0.62 0.14 150);        /* średnio ciemna, nasycona zieleń */
+  --primary-foreground: oklch(0.99 0.01 95); /* prawie biały tekst */
+
+  /* SECONDARY – ziemiste akcenty (np. guziki wtórne) */
+  --secondary: oklch(0.78 0.08 60);       /* ciepły, jasny brąz */
+  --secondary-foreground: oklch(0.22 0.03 40);
+
+  /* MUTED – tła paneli, sidebaru, filtrów */
+  --muted: oklch(0.95 0.02 95);
+  --muted-foreground: oklch(0.45 0.03 50);
+
+  /* ACCENT – delikatna zieleń do hoverów, badge’y „przy lesie” */
+  --accent: oklch(0.93 0.05 145);
+  --accent-foreground: oklch(0.25 0.06 150);
+
+  /* DESTRUCTIVE – czerwony */
+  --destructive: oklch(0.6 0.16 25);
+  --destructive-foreground: oklch(0.99 0.01 95);
+
+  /* BORDER / INPUT / RING */
+  --border: oklch(0.9 0.02 95);
+  --input: oklch(0.9 0.02 95);
+  --ring: oklch(0.62 0.14 150);           /* zieleń primary */
+
+  /* CHART – zostawiamy w podobnym klimacie */
+  --chart-1: oklch(0.65 0.16 150);
+  --chart-2: oklch(0.62 0.13 120);
+  --chart-3: oklch(0.7 0.12 80);
+  --chart-4: oklch(0.6 0.11 40);
+  --chart-5: oklch(0.55 0.12 200);
+
+  /* Promień */
+  --radius: 0.75rem;
+
+  /* Sidebar – ten sam klimat */
+  --sidebar: oklch(0.96 0.02 95);
+  --sidebar-foreground: oklch(0.19 0.03 50);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
-.dark {
+
+/* .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.145 0 0);
@@ -76,7 +134,62 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+} */
+
+.dark {
+  /* DARK – tło, tekst, karty */
+  --background: oklch(0.16 0.04 150);        /* ciemne tło z nutą zieleni */
+  --foreground: oklch(0.97 0.01 95);         /* jasny tekst */
+
+  --card: oklch(0.19 0.04 150);              /* karta jaśniejsza od tła */
+  --card-foreground: oklch(0.97 0.01 95);
+
+  --popover: oklch(0.19 0.04 150);
+  --popover-foreground: oklch(0.97 0.01 95);
+
+  /* PRIMARY – zielony akcent, lekko świecący */
+  --primary: oklch(0.74 0.14 145);
+  --primary-foreground: oklch(0.16 0.04 150);
+
+  /* SECONDARY – ciepły brąz */
+  --secondary: oklch(0.4 0.08 60);
+  --secondary-foreground: oklch(0.96 0.01 95);
+
+  /* MUTED – panelowe tła */
+  --muted: oklch(0.22 0.03 150);
+  --muted-foreground: oklch(0.78 0.03 95);
+
+  /* ACCENT – ciemna zieleń dla badge’y */
+  --accent: oklch(0.3 0.06 145);
+  --accent-foreground: oklch(0.96 0.01 95);
+
+  /* DESTRUCTIVE */
+  --destructive: oklch(0.55 0.16 25);
+  --destructive-foreground: oklch(0.98 0.01 95);
+
+  /* BORDER / INPUT / RING */
+  --border: oklch(0.28 0.03 150);
+  --input: oklch(0.28 0.03 150);
+  --ring: oklch(0.74 0.14 145);
+
+  /* Chart */
+  --chart-1: oklch(0.7 0.17 145);
+  --chart-2: oklch(0.65 0.16 120);
+  --chart-3: oklch(0.7 0.15 80);
+  --chart-4: oklch(0.65 0.14 40);
+  --chart-5: oklch(0.68 0.18 200);
+
+  /* Sidebar */
+  --sidebar: oklch(0.18 0.04 150);
+  --sidebar-foreground: oklch(0.97 0.01 95);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
+
 
 @theme inline {
   --color-background: var(--background);
