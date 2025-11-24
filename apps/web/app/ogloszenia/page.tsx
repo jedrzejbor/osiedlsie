@@ -196,14 +196,19 @@ export default function ListingsPage() {
         id: listing.id,
         title: listing.title,
         location: `${listing.province}, ${listing.location}`,
-        priceLabel: `${listing.price.toLocaleString("pl-PL")} zł`,
-        plotAreaLabel: `${listing.plotArea.toLocaleString("pl-PL")} m²`,
+        priceLabel: `${listing.price} zł`,
+        plotAreaLabel: `${listing.plotArea} m²`,
         houseAreaLabel: listing.houseArea
-          ? `${listing.houseArea.toLocaleString("pl-PL")} m²`
+          ? `${listing.houseArea} m²`
           : undefined,
         tagsLabels: listing.tags
           .map((tag) => tagLabelMap[tag] ?? tag)
           .filter(Boolean),
+        images: [
+          "/images/first.jpg",
+          "/images/second.jpg",
+          "/images/third.jpg",
+        ],
       })),
     [filteredListings]
   );
@@ -240,6 +245,7 @@ export default function ListingsPage() {
                 plotArea={listing.plotAreaLabel}
                 houseArea={listing.houseAreaLabel}
                 tags={listing.tagsLabels}
+                images={listing.images}
               />
             ))}
 
