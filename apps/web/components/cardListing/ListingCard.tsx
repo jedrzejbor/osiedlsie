@@ -15,6 +15,8 @@ type ListingCardProps = {
   tags?: string[];
   imageUrl?: string;      // pojedyncze zdjęcie (fallback)
   images?: string[];      // karuzela zdjęć
+
+  createdAtLabel?: string; // np. "Dodano: 2 dni temu"
 };
 
 export function ListingCard({
@@ -26,28 +28,33 @@ export function ListingCard({
   tags = [],
   imageUrl = "/images/hurtlink-dashboard.png",
   images,
+  createdAtLabel,
 }: ListingCardProps) {
-
   // jeśli mamy tablicę zdjęć, używamy jej; inaczej jedno zdjęcie
   const allImages = images && images.length > 0 ? images : [imageUrl];
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const hasMultipleImages = allImages.length > 1;
 
-  const goPrev = () => {
+  const goPrev = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     setCurrentIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
   };
 
-  const goNext = () => {
+  const goNext = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     setCurrentIndex((prev) => (prev + 1) % allImages.length);
   };
 
   return (
-    <Card className="w-full overflow-hidden border bg-card">
-      <div className="flex gap-4">
-        {/* LEWA STRONA – ZDJĘCIE (KWADRAT) Z KARUZELOM */}
-        <div className="flex-shrink-0">
-          <div className="relative aspect-square w-28 md:w-36 lg:w-80 h-full overflow-hidden rounded-lg bg-muted">
+    <Card className="w-full overflow-hidden border bg-card transition-transform transition-shadow duration-150 hover:-translate-y-0.5 hover:shadow-md cursor-pointer">
+      {/* MOBILE: kolumna, DESKTOP: wiersz */}
+      <div className="flex flex-col gap-4 md:flex-row">
+        {/* ZDJĘCIE */}
+        <div className="md:flex-shrink-0">
+          <div className="relative w-full aspect-[4/3] md:w-36 md:aspect-square lg:w-80 overflow-hidden rounded-lg bg-muted">
             <img
               src={allImages[currentIndex]}
               alt={title}
@@ -97,16 +104,24 @@ export function ListingCard({
           </div>
         </div>
 
-        {/* PRAWA STRONA – TREŚĆ OGŁOSZENIA */}
-        <div className="flex flex-1 flex-col justify-between py-6 pr-3">
-          {/* Tytuł + lokalizacja */}
-          <div className="space-y-1">
-            <h3 className="text-base font-semibold leading-snug line-clamp-2">
-              {title}
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              {location}
-            </p>
+        {/* TREŚĆ OGŁOSZENIA */}
+        <div className="flex flex-1 flex-col justify-between px-3 pb-3 pt-2 md:py-6 md:pr-3 md:pl-0">
+          {/* Tytuł + lokalizacja + data */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-1">
+              <h3 className="text-base font-semibold leading-snug line-clamp-2">
+                {title}
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                {location}
+              </p>
+            </div>
+
+            {createdAtLabel && (
+              <span className="ml-2 text-[10px] text-muted-foreground whitespace-nowrap">
+                {createdAtLabel}
+              </span>
+            )}
           </div>
 
           {/* Tagi (cechy siedliska) */}
@@ -136,8 +151,9 @@ export function ListingCard({
               </p>
             </div>
 
+            {/* To na razie placeholder – później np. "Siedlisko / biuro / prywatne" */}
             <p className="text-[11px] text-muted-foreground">
-              Siedlisko • ogłoszenie prywatne
+              Ogłoszenie prywatne
             </p>
           </div>
         </div>

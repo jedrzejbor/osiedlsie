@@ -1,63 +1,3 @@
-// import { ListingCard } from "@/components/cardListing/ListingCard";
-// import { FiltersPanel } from "@/components/filters/FiltersPanel";
-
-// const mockListings = [
-//   {
-//     title: "Siedlisko pod lasem, 1.2 ha, strumyk na działce",
-//     location: "Podkarpackie, pow. sanocki",
-//     price: "420 000 zł",
-//     plotArea: "12 000 m²",
-//     houseArea: "80 m²",
-//     tags: ["przy lesie", "bez sąsiadów 300 m"],
-//   },
-//   {
-//     title: "Działka pod siedlisko przy ścianie lasu",
-//     location: "Warmińsko-Mazurskie, okolice Mrągowa",
-//     price: "260 000 zł",
-//     plotArea: "8 500 m²",
-//     tags: ["przy lesie"],
-//   },
-//   {
-//     title: "Stare siedlisko do remontu, pagórkowaty teren",
-//     location: "Lubelskie, Roztocze",
-//     price: "350 000 zł",
-//     plotArea: "10 000 m²",
-//     houseArea: "90 m²",
-//     tags: ["do remontu", "widok na las"],
-//   },
-// ];
-
-// export default function ListingsPage() {
-//   return (
-//     <main className="min-h-screen bg-background">
-//       <section className="mx-auto flex max-w-6xl gap-6 px-4 py-8">
-//         {/* Lewa kolumna – filtry */}
-//         <FiltersPanel />
-
-
-//         {/* Prawa kolumna – lista ogłoszeń */}
-//         <div className="flex-1 space-y-4">
-//           <header className="space-y-1">
-//             <h1 className="text-2xl font-semibold tracking-tight">
-//               Ogłoszenia siedlisk i działek pod lasem
-//             </h1>
-//             <p className="text-sm text-muted-foreground">
-//               Przeglądaj oferty siedlisk, domów i działek położonych przy lesie.
-//             </p>
-//           </header>
-
-//           <div className="flex flex-col gap-4">
-//             {mockListings.map((listing) => (
-//               <ListingCard key={listing.title} {...listing} />
-//             ))}
-//           </div>
-//         </div>
-//       </section>
-//     </main>
-//   );
-// }
-
-
 "use client";
 
 import { useMemo, useState } from "react";
@@ -65,6 +5,8 @@ import { ListingCard } from "@/components/cardListing/ListingCard";
 import { FiltersPanel } from "@/components/filters/FiltersPanel";
 import { filtersConfig, ListingType } from "@/components/filters/filtersConfig";
 import type { FiltersState } from "@/components/filters/FiltersPanel";
+import Link from "next/link";
+
 
 type Listing = {
   id: number;
@@ -128,6 +70,7 @@ const defaultFilters: FiltersState = {
 
 export default function ListingsPage() {
   const [filters, setFilters] = useState<FiltersState>(defaultFilters);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const filteredListings = useMemo(() => {
     return mockListings.filter((listing) => {
@@ -209,6 +152,7 @@ export default function ListingsPage() {
           "/images/second.jpg",
           "/images/third.jpg",
         ],
+        createdAtLabel: "Dodano: 2 dni temu",
       })),
     [filteredListings]
   );
@@ -217,7 +161,10 @@ export default function ListingsPage() {
     <main className="min-h-screen bg-background">
       <section className="mx-auto flex max-w-6xl gap-6 px-4 py-8">
         {/* Lewa kolumna – filtry */}
-        <FiltersPanel onChange={setFilters} />
+        <FiltersPanel
+          onChange={setFilters}
+          className="hidden w-72 flex-shrink-0 md:block"
+        />
 
         {/* Prawa kolumna – lista ogłoszeń */}
         <div className="flex-1 space-y-4">
@@ -237,16 +184,23 @@ export default function ListingsPage() {
 
           <div className="flex flex-col gap-4">
             {listingsForUi.map((listing) => (
-              <ListingCard
+              <Link
                 key={listing.id}
-                title={listing.title}
-                location={listing.location}
-                price={listing.priceLabel}
-                plotArea={listing.plotAreaLabel}
-                houseArea={listing.houseAreaLabel}
-                tags={listing.tagsLabels}
-                images={listing.images}
-              />
+                href={`/ogloszenia/${listing.id}`}
+                className="block"
+              >
+                <ListingCard
+                  key={listing.id}
+                  title={listing.title}
+                  location={listing.location}
+                  price={listing.priceLabel}
+                  plotArea={listing.plotAreaLabel}
+                  houseArea={listing.houseAreaLabel}
+                  tags={listing.tagsLabels}
+                  images={listing.images}
+                  createdAtLabel={listing.createdAtLabel}
+                />
+              </Link>
             ))}
 
             {listingsForUi.length === 0 && (
