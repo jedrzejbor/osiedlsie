@@ -6,7 +6,8 @@ import { FiltersPanel } from "@/components/filters/FiltersPanel";
 import { filtersConfig, ListingType } from "@/components/filters/filtersConfig";
 import type { FiltersState } from "@/components/filters/FiltersPanel";
 import Link from "next/link";
-
+import { Button } from "@workspace/ui/components/button";
+import { FiltersDrawerDesktop } from "@/components/filters/FiltersDrawerDesktop";
 
 type Listing = {
   id: number;
@@ -159,14 +160,9 @@ export default function ListingsPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <section className="mx-auto flex max-w-6xl gap-6 px-4 py-8">
-        {/* Lewa kolumna – filtry */}
-        <FiltersPanel
-          onChange={setFilters}
-          className="hidden w-72 flex-shrink-0 md:block"
-        />
-
-        {/* Prawa kolumna – lista ogłoszeń */}
+      <FiltersDrawerDesktop onChange={setFilters} />
+      <section className="mx-auto flex max-w-6xl px-4 py-8">
+        {/* Prawa kolumna – lista ogłoszeń (na całą szerokość) */}
         <div className="flex-1 space-y-4">
           <header className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight">
@@ -182,6 +178,18 @@ export default function ListingsPage() {
             </p>
           </header>
 
+          {/* Przycisk filtrów na mobile */}
+          <div className="md:hidden">
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2 w-full"
+              onClick={() => setIsFiltersOpen(true)}
+            >
+              Filtry
+            </Button>
+          </div>
+
           <div className="flex flex-col gap-4">
             {listingsForUi.map((listing) => (
               <Link
@@ -190,7 +198,6 @@ export default function ListingsPage() {
                 className="block"
               >
                 <ListingCard
-                  key={listing.id}
                   title={listing.title}
                   location={listing.location}
                   price={listing.priceLabel}
@@ -211,6 +218,47 @@ export default function ListingsPage() {
           </div>
         </div>
       </section>
+
+      {/* Overlay filtrów na mobile */}
+      {isFiltersOpen && (
+        <div className="fixed inset-0 z-40 bg-black/40 lg:hidden">
+          <div className="absolute inset-x-0 bottom-0 max-h-[80vh] rounded-t-2xl bg-background p-4 shadow-xl">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-sm font-medium">Filtry</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsFiltersOpen(false)}
+              >
+                ✕
+              </Button>
+            </div>
+
+            <div className="overflow-y-auto pr-1">
+              <FiltersPanel
+                onChange={(f) => setFilters(f)}
+                className="w-full border-0 shadow-none"
+              />
+            </div>
+
+            <div className="mt-3 flex gap-2">
+              <Button
+                variant="outline"
+                className="w-1/2"
+                onClick={() => setIsFiltersOpen(false)}
+              >
+                Zamknij
+              </Button>
+              <Button
+                className="w-1/2"
+                onClick={() => setIsFiltersOpen(false)}
+              >
+                Pokaż wyniki
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -7,6 +7,7 @@ import { Label } from "@workspace/ui/components/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { Button } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
 
 export type FiltersState = {
   province: string;
@@ -21,9 +22,10 @@ export type FiltersState = {
 type FiltersPanelProps = {
   // na później: callback do wołania API / aktualizacji URL
   onChange?: (filters: FiltersState) => void;
+  className?: string;
 };
 
-export function FiltersPanel({ onChange }: FiltersPanelProps) {
+export function FiltersPanel({ onChange, className }: FiltersPanelProps) {
   const [filters, setFilters] = useState<FiltersState>({
     province: "Dowolne",
     listingType: "ALL",
@@ -48,7 +50,13 @@ export function FiltersPanel({ onChange }: FiltersPanelProps) {
   };
 
   return (
-    <aside className="hidden w-72 flex-shrink-0 rounded-xl border bg-card p-4 shadow-sm md:block">
+    <aside 
+      // className="hidden w-72 flex-shrink-0 rounded-xl border bg-card p-4 shadow-sm md:block"
+      className={cn(
+        "rounded-xl border bg-card p-4 shadow-sm",
+        className
+      )}
+    >
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold">
           Filtry
