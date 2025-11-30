@@ -69,9 +69,52 @@ const defaultFilters: FiltersState = {
   tags: [],
 };
 
+const countActiveFilters = (filters: FiltersState): number => {
+  let count = 0;
+
+  // Województwo
+  if (filters.province && filters.province !== "Dowolne") {
+    count++;
+  }
+
+  // Cena
+  if (
+    typeof filters.minPrice === "number" ||
+    typeof filters.maxPrice === "number"
+  ) {
+    count++;
+  }
+
+  // Powierzchnia działki
+  if (
+    typeof filters.minPlotArea === "number" ||
+    typeof filters.maxPlotArea === "number"
+  ) {
+    count++;
+  }
+
+  // Typ nieruchomości
+  if (filters.listingType && filters.listingType !== "ALL") {
+    count++;
+  }
+
+  // Tagi – liczone jako jedno „pole filtrujące”, nawet jeśli zaznaczysz kilka
+  if (filters.tags.length > 0) {
+    count++;
+  }
+
+  return count;
+};
+
+
 export default function ListingsPage() {
   const [filters, setFilters] = useState<FiltersState>(defaultFilters);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+  const activeFiltersCount = useMemo(
+    () => countActiveFilters(filters),
+    [filters]
+  );  
 
   const filteredListings = useMemo(() => {
     return mockListings.filter((listing) => {
@@ -160,7 +203,10 @@ export default function ListingsPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <FiltersDrawerDesktop onChange={setFilters} />
+      <FiltersDrawerDesktop 
+        onChange={setFilters} 
+        activeFiltersCount={activeFiltersCount}
+      />
       <section className="mx-auto flex max-w-6xl px-4 py-8">
         {/* Prawa kolumna – lista ogłoszeń (na całą szerokość) */}
         <div className="flex-1 space-y-4">
