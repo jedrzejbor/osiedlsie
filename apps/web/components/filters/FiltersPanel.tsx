@@ -19,6 +19,16 @@ export type FiltersState = {
   tags: string[];
 };
 
+export const defaultFiltersState: FiltersState = {
+  province: "Dowolne",
+  listingType: "ALL",
+  tags: [],
+  minPrice: undefined,
+  maxPrice: undefined,
+  minPlotArea: undefined,
+  maxPlotArea: undefined,
+};
+
 type FiltersPanelProps = {
   // na później: callback do wołania API / aktualizacji URL
   onChange?: (filters: FiltersState) => void;
@@ -26,11 +36,7 @@ type FiltersPanelProps = {
 };
 
 export function FiltersPanel({ onChange, className }: FiltersPanelProps) {
-  const [filters, setFilters] = useState<FiltersState>({
-    province: "Dowolne",
-    listingType: "ALL",
-    tags: [],
-  });
+  const [filters, setFilters] = useState<FiltersState>(defaultFiltersState);
 
   function updateFilters(partial: Partial<FiltersState>) {
     const next = { ...filters, ...partial };
@@ -65,13 +71,7 @@ export function FiltersPanel({ onChange, className }: FiltersPanelProps) {
           variant="ghost"
           size="sm"
           className="text-xs"
-          onClick={() =>
-            setFilters({
-              province: "Dowolne",
-              listingType: "ALL",
-              tags: [],
-            })
-          }
+          onClick={() => updateFilters(defaultFiltersState)}
         >
           Wyczyść
         </Button>

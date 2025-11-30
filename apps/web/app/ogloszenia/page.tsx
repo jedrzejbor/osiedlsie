@@ -2,9 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { ListingCard } from "@/components/cardListing/ListingCard";
-import { FiltersPanel } from "@/components/filters/FiltersPanel";
 import { filtersConfig, ListingType } from "@/components/filters/filtersConfig";
-import type { FiltersState } from "@/components/filters/FiltersPanel";
+import {
+  FiltersPanel,
+  type FiltersState,
+  defaultFiltersState,
+} from "@/components/filters/FiltersPanel";
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import { FiltersDrawerDesktop } from "@/components/filters/FiltersDrawerDesktop";
@@ -62,59 +65,48 @@ const tagLabelMap = Object.fromEntries(
   filtersConfig.tags.map((t) => [t.value, t.label])
 );
 
-// domyślne filtry (musi być spójne z FiltersPanel)
-const defaultFilters: FiltersState = {
-  province: "Dowolne",
-  listingType: "ALL",
-  tags: [],
-};
-
-const countActiveFilters = (filters: FiltersState): number => {
+const countActiveFilters = (
+  filters: FiltersState,
+  defaults: FiltersState
+): number => {
   let count = 0;
 
-  // Województwo
-  if (filters.province && filters.province !== "Dowolne") {
-    count++;
-  }
+  (Object.keys(defaults) as (keyof FiltersState)[]).forEach((key) => {
+    const current = filters[key];
+    const def = defaults[key];
 
-  // Cena
-  if (
-    typeof filters.minPrice === "number" ||
-    typeof filters.maxPrice === "number"
-  ) {
-    count++;
-  }
+    // Porównanie tablic (np. tags)
+    if (Array.isArray(current) || Array.isArray(def)) {
+      const curArr = (current as unknown[]) ?? [];
+      const defArr = (def as unknown[]) ?? [];
 
-  // Powierzchnia działki
-  if (
-    typeof filters.minPlotArea === "number" ||
-    typeof filters.maxPlotArea === "number"
-  ) {
-    count++;
-  }
+      if (
+        curArr.length !== defArr.length ||
+        curArr.some((v, i) => v !== defArr[i])
+      ) {
+        count++;
+      }
+      return;
+    }
 
-  // Typ nieruchomości
-  if (filters.listingType && filters.listingType !== "ALL") {
-    count++;
-  }
-
-  // Tagi – liczone jako jedno „pole filtrujące”, nawet jeśli zaznaczysz kilka
-  if (filters.tags.length > 0) {
-    count++;
-  }
+    // Zwykłe porównanie wartości (string, number, undefined)
+    if (current !== def) {
+      count++;
+    }
+  });
 
   return count;
 };
 
 
 export default function ListingsPage() {
-  const [filters, setFilters] = useState<FiltersState>(defaultFilters);
+  const [filters, setFilters] = useState<FiltersState>(defaultFiltersState);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const activeFiltersCount = useMemo(
-    () => countActiveFilters(filters),
+    () => countActiveFilters(filters, defaultFiltersState),
     [filters]
-  );  
+  );
 
   const filteredListings = useMemo(() => {
     return mockListings.filter((listing) => {
