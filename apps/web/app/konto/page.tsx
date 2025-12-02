@@ -84,9 +84,6 @@ export default function AccountDashboardPage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href="/ogloszenia">Przeglądaj ogłoszenia</Link>
-            </Button>
             <Button asChild size="sm">
               <Link href="/ogloszenia/dodaj">Dodaj ogłoszenie</Link>
             </Button>
