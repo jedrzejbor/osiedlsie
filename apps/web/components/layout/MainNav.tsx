@@ -13,6 +13,15 @@ export function MainNav() {
           <Link href="/ogloszenia" className="text-sm">
             Ogłoszenia
           </Link>
+          <Link href="/logowanie" className="text-sm">
+            Logowanie
+          </Link>
+          <Link href="/konto" className="text-sm">
+            Konto
+          </Link>
+          <Link href="/rejestracja" className="text-sm">
+            Rejestracja
+          </Link>
           <ThemeToggle />
         </nav>
       </div>
