@@ -1,0 +1,100 @@
+### Plik do testowania API w VS Code (wymaga rozszerzenia REST Client)
+### https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+@baseUrl = http://localhost:3001/api
+@contentType = application/json
+
+### Zmienne (wypełnij po otrzymaniu tokena)
+@accessToken = your_token_here
+
+###############################################
+# Autentykacja
+###############################################
+
+### 1. Rejestracja nowego użytkownika
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "name": "Jan Kowalski"
+}
+
+### 2. Logowanie
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Zapisz token z poprzedniego requesta
+@accessToken = {{login.response.body.$.accessToken}}
+
+###############################################
+# Chronione endpointy (wymaga tokena)
+###############################################
+
+### 3. Pobierz profil użytkownika (wymaga zalogowania)
+GET {{baseUrl}}/users/profile
+Authorization: Bearer {{accessToken}}
+
+### 4. Endpoint dla admina (wymaga roli ADMIN)
+GET {{baseUrl}}/users/admin
+Authorization: Bearer {{accessToken}}
+
+###############################################
+# Publiczne endpointy
+###############################################
+
+### 5. Publiczne dane (nie wymaga tokena)
+GET {{baseUrl}}/users/public
+
+###############################################
+# Testowanie błędów
+###############################################
+
+### 6. Rejestracja z istniejącym emailem (409 Conflict)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "name": "Inny Użytkownik"
+}
+
+### 7. Logowanie z błędnym hasłem (401 Unauthorized)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "test@example.com",
+  "password": "wrongpassword"
+}
+
+### 8. Dostęp do chronionego endpointu bez tokena (401 Unauthorized)
+GET {{baseUrl}}/users/profile
+
+### 9. Walidacja - za krótkie hasło (400 Bad Request)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "newuser@example.com",
+  "password": "123",
+  "name": "Nowy Użytkownik"
+}
+
+### 10. Walidacja - nieprawidłowy email (400 Bad Request)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "invalid-email",
+  "password": "password123",
+  "name": "Nowy Użytkownik"
+}
