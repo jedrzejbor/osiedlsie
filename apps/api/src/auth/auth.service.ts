@@ -9,7 +9,7 @@ import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { LoginDto, RegisterDto, AuthResponseDto } from './dto/auth.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
-import { userLoginSchema, userRegisterSchema } from '@workspace/zod-validation';
+import { userLoginSchema, userRegisterSchema } from '../validation/user.validation';
 
 @Injectable()
 export class AuthService {
