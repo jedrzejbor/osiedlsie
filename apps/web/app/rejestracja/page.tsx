@@ -1,179 +1,140 @@
-"use client";
+'use client';
 
-import { FormEvent, useState } from "react";
-import Link from "next/link";
-import { Card } from "@workspace/ui/components/card";
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { Label } from "@workspace/ui/components/label";
+import { useState } from 'react';
+import { useAuth } from '@/contexts/auth-context';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { userRegisterSchema } from '@workspace/zod-validation';
+import type { UserRegisterInput } from '@workspace/zod-validation';
+import { Button } from '@workspace/ui/components/button';
+import { Input } from '@workspace/ui/components/input';
+import { Label } from '@workspace/ui/components/label';
 import {
-  userRegisterSchema,
-  type UserRegisterInput,
-} from "@workspace/zod-validation/src/user";
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@workspace/ui/components/card';
+import Link from 'next/link';
 
 export default function RegisterPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<Partial<Record<keyof UserRegisterInput | "confirmPassword" | "form", string>>>({});
+  const { register: registerUser } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setErrors({});
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<UserRegisterInput>({
+    resolver: zodResolver(userRegisterSchema),
+  });
 
-    const formData = new FormData(e.currentTarget);
-
-    const rawPassword = String(formData.get("password") ?? "");
-    const confirm = String(formData.get("confirmPassword") ?? "");
-
-    if (rawPassword !== confirm) {
-      setErrors({
-        confirmPassword: "Hasła muszą być takie same.",
-      });
-      setIsSubmitting(false);
-      return;
+  const onSubmit = async (data: UserRegisterInput) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await registerUser(data);
+      // Redirect is handled in AuthContext
+    } catch (err: any) {
+      setError(err.message || 'Nie udało się zarejestrować');
+    } finally {
+      setIsLoading(false);
     }
-
-    const data: UserRegisterInput = {
-      name: formData.get("name")
-        ? String(formData.get("name"))
-        : undefined,
-      email: String(formData.get("email") ?? ""),
-      password: rawPassword,
-      role: "USER", // lub zostaw default z schematu
-    };
-
-    const result = userRegisterSchema.safeParse(data);
-
-    if (!result.success) {
-      const fieldErrors: Partial<
-        Record<keyof UserRegisterInput | "confirmPassword" | "form", string>
-      > = {};
-
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as keyof UserRegisterInput | undefined;
-        if (field) {
-          fieldErrors[field] = issue.message;
-        } else {
-          fieldErrors.form = issue.message;
-        }
-      });
-
-      setErrors(fieldErrors);
-      setIsSubmitting(false);
-      return;
-    }
-
-    // TODO: tu później wywołasz /auth/register
-    console.log("Register payload (valid):", result.data);
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-    }, 800);
   };
 
-
   return (
-    <main className="relative flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md">
-        <Card className="w-full border bg-card px-6 py-8 shadow-sm">
-          <div className="mb-6 space-y-1 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Załóż konto
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Utwórz konto, aby dodawać i obserwować ogłoszenia.
-            </p>
-          </div>
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl">Rejestracja</CardTitle>
+          <CardDescription>
+            Utwórz nowe konto, aby korzystać z serwisu
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <CardContent className="space-y-4">
+            {error && (
+              <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+                {error}
+              </div>
+            )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* imię / nazwa */}
-            <div className="space-y-1.5">
-              <Label htmlFor="name">Imię lub nazwa</Label>
+            <div className="space-y-2">
+              <Label htmlFor="name">Imię i nazwisko (opcjonalne)</Label>
               <Input
                 id="name"
-                name="name"
                 type="text"
-                autoComplete="name"
                 placeholder="Jan Kowalski"
+                {...register('name')}
+                disabled={isLoading}
               />
               {errors.name && (
-                <p className="text-xs text-destructive">{errors.name}</p>
+                <p className="text-sm text-destructive">
+                  {errors.name.message}
+                </p>
               )}
             </div>
 
-            {/* email */}
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Adres e-mail</Label>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                name="email"
                 type="email"
-                autoComplete="email"
-                placeholder="jan.kowalski@example.com"
-                required
+                placeholder="twoj@email.com"
+                {...register('email')}
+                disabled={isLoading}
               />
               {errors.email && (
-                <p className="text-xs text-destructive">{errors.email}</p>
+                <p className="text-sm text-destructive">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
-
-            {/* hasło */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="password">Hasło</Label>
               <Input
                 id="password"
-                name="password"
                 type="password"
-                autoComplete="new-password"
-                placeholder="Minimum 8 znaków"
-                required
+                placeholder="••••••••"
+                {...register('password')}
+                disabled={isLoading}
               />
               {errors.password && (
-                <p className="text-xs text-destructive">{errors.password}</p>
+                <p className="text-sm text-destructive">
+                  {errors.password.message}
+                </p>
               )}
+              <p className="text-xs text-muted-foreground">
+                Hasło musi mieć co najmniej 8 znaków
+              </p>
             </div>
+          </CardContent>
 
-
-            {/* powtórz hasło */}
-            <div className="space-y-1.5">
-              <Label htmlFor="confirmPassword">Powtórz hasło</Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                placeholder="Powtórz hasło"
-                required
-              />
-              {errors.confirmPassword && (
-                <p className="text-xs text-destructive">{errors.confirmPassword}</p>
-              )}
-            </div>
-
-
+          <CardFooter className="flex flex-col space-y-4">
             <Button
               type="submit"
-              className="mt-2 w-full"
-              disabled={isSubmitting}
+              className="w-full"
+              disabled={isLoading}
             >
-              {isSubmitting ? "Tworzenie konta..." : "Zarejestruj się"}
+              {isLoading ? 'Rejestrowanie...' : 'Zarejestruj się'}
             </Button>
-          </form>
 
-          <div className="mt-6 space-y-2 text-center text-sm text-muted-foreground">
-            <p>
-              Masz już konto?{" "}
+            <div className="text-center text-sm text-muted-foreground">
+              Masz już konto?{' '}
               <Link
-                href="/logowanie"
-                className="font-medium text-primary underline-offset-4 hover:underline"
+                href="/login"
+                className="text-primary hover:underline"
               >
                 Zaloguj się
               </Link>
-            </p>
-          </div>
-        </Card>
-      </div>
-    </main>
+            </div>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
   );
 }

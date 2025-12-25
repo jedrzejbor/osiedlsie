@@ -42,10 +42,41 @@ JWT_SECRET=twoj-bezpieczny-klucz
 
 ## Uruchomienie
 
-### Development (wszystkie aplikacje)
+### Krok 1: Uruchom bazę danych PostgreSQL
+```bash
+# Utwórz bazę danych
+createdb osiedlsie
+
+# Lub z psql:
+psql -U postgres
+CREATE DATABASE osiedlsie;
+```
+
+### Krok 2: Skonfiguruj zmienne środowiskowe
+
+**Backend (`apps/api/.env`):**
+```bash
+cd apps/api
+cp .env.example .env
+# Edytuj .env z danymi do bazy
+```
+
+**Frontend (`apps/web/.env.local`):**
+```bash
+cd apps/web
+cp .env.example .env.local
+```
+
+### Krok 3: Uruchom aplikacje
+
+#### Development (wszystkie aplikacje)
 ```bash
 pnpm dev
 ```
+
+**Aplikacje będą dostępne pod:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:3001/api
 
 ### Frontend (web)
 ```bash
@@ -57,7 +88,28 @@ pnpm --filter web dev
 pnpm --filter api dev
 ```
 
-API będzie dostępne na: `http://localhost:3001/api`
+## 🔐 Autentykacja
+
+System autentykacji został w pełni zintegrowany:
+
+### Dostępne funkcje:
+- ✅ Rejestracja użytkowników
+- ✅ Logowanie z JWT
+- ✅ Ochrona chronionych stron (middleware)
+- ✅ Wylogowanie
+- ✅ Zarządzanie sesją (cookies + localStorage)
+- ✅ Walidacja formularzy (Zod)
+
+### Strony:
+- `/register` lub `/rejestracja` - Rejestracja
+- `/login` lub `/logowanie` - Logowanie
+- `/konto` - Profil użytkownika (chronione)
+- `/main` - Strona główna dla zalogowanych (chronione)
+
+### Dokumentacja:
+- Backend: `apps/api/README.md`
+- Frontend Auth: `apps/web/AUTHENTICATION.md`
+- API Testing: `apps/api/API_TESTING.md`
 
 ## Endpointy API
 
