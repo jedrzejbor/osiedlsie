@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
+import { useAuth } from "@/contexts/auth-context";
 
 // Mockowane dane użytkownika – później podmienimy na dane z API/auth
 const mockUser = {
@@ -68,6 +69,50 @@ function getStatusBadge(status: "ACTIVE" | "DRAFT" | "EXPIRED") {
   }
 }
 
+function UserInfo() {
+  const { user, logout } = useAuth();
+  
+  if (!user) return null;
+
+  const createdDate = new Date(user.createdAt);
+  const formattedDate = createdDate.toLocaleDateString('pl-PL', { 
+    year: 'numeric', 
+    month: 'long' 
+  });
+
+  return (
+    <>
+      <div className="space-y-1 text-sm">
+        <p className="font-medium">{user.name || 'Użytkownik'}</p>
+        <p className="text-muted-foreground">{user.email}</p>
+        <p className="text-xs text-muted-foreground">
+          Z nami od {formattedDate}
+        </p>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
+        <Badge variant="outline" className="text-[11px]">
+          {user.role === 'ADMIN' ? 'Administrator' : 'Konto prywatne'}
+        </Badge>
+        <span>•</span>
+        <span>Plan: podstawowy</span>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button variant="outline" size="sm">
+          Edytuj dane konta
+        </Button>
+        <Button variant="ghost" size="sm">
+          Zmień hasło
+        </Button>
+        <Button variant="destructive" size="sm" onClick={logout}>
+          Wyloguj się
+        </Button>
+      </div>
+    </>
+  );
+}
+
 export default function AccountDashboardPage() {
   return (
     <main className="min-h-screen bg-background">
@@ -99,30 +144,7 @@ export default function AccountDashboardPage() {
           <div className="space-y-4">
             <Card className="p-4 sm:p-5">
               <h2 className="mb-2 text-sm font-semibold">Dane konta</h2>
-              <div className="space-y-1 text-sm">
-                <p className="font-medium">{mockUser.name}</p>
-                <p className="text-muted-foreground">{mockUser.email}</p>
-                <p className="text-xs text-muted-foreground">
-                  {mockUser.createdAtLabel}
-                </p>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                <Badge variant="outline" className="text-[11px]">
-                  Konto prywatne
-                </Badge>
-                <span>•</span>
-                <span>Plan: podstawowy</span>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button variant="outline" size="sm">
-                  Edytuj dane konta
-                </Button>
-                <Button variant="ghost" size="sm">
-                  Zmień hasło
-                </Button>
-              </div>
+              <UserInfo />
             </Card>
 
             <Card className="p-4 sm:p-5">

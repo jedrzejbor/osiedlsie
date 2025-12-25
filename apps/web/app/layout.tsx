@@ -1,7 +1,7 @@
+import type { Metadata } from "next"
 import { Geist_Mono,Plus_Jakarta_Sans } from "next/font/google"
 
 import "@workspace/ui/globals.css"
-import { ThemeProvider } from "@workspace/ui/providers/theme-provider";
 import { Providers } from "@/components/providers"
 import { MainNav } from "@/components/layout/MainNav"
 
@@ -31,10 +31,10 @@ export default function RootLayout({
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
       >
-        <ThemeProvider>
+        <Providers>
           <MainNav />
-          <Providers>{children}</Providers>
-        </ThemeProvider>
+          {children}
+        </Providers>
       </body>
     </html>
   )
