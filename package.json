@@ -21,5 +21,17 @@
   },
   "dependencies": {
     "zod": "^3.25.76"
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "@nestjs/core",
+      "@tailwindcss/oxide",
+      "core-js-pure",
+      "sharp",
+      "unrs-resolver"
+    ],
+    "onlyBuiltDependencies": [
+      "bcrypt"
+    ]
   }
 }
