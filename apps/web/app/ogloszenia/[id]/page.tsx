@@ -77,12 +77,12 @@ const typeLabelMap: Record<ListingType, string> = {
 };
 
 type PageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
-export default async function ListingDetailsPage({ params }: PageProps) {
-  const param = await params;
-  const id = Number(param.id);
+export default async function ListingDetailsPage(props: PageProps) {
+  const params = await props.params;
+  const id = Number(params.id);
   const listing = mockListings.find((l) => l.id === id);
 
   if (!listing) {
