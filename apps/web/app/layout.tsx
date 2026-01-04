@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { Geist_Mono,Plus_Jakarta_Sans } from "next/font/google"
 
-import "@workspace/ui/globals.css"
+import "./globals.css"
 import { Providers } from "@/components/providers"
 import { MainNav } from "@/components/layout/MainNav"
 

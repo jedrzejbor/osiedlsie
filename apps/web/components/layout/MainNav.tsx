@@ -39,11 +39,11 @@ export function MainNav() {
             </>
           ) : (
             <>
-              <Link href="/login" className="text-sm hover:underline">
+              <Link href="/logowanie" className="text-sm hover:underline">
                 Logowanie
               </Link>
               <Button asChild variant="default" size="sm">
-                <Link href="/register">
+                <Link href="/rejestracja">
                   Rejestracja
                 </Link>
               </Button>

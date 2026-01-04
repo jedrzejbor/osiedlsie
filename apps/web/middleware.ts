@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server';
 const protectedRoutes = ['/main', '/konto', '/ogloszenia/nowe'];
 
 // Routes that should redirect to main if user is already authenticated
-const authRoutes = ['/login', '/register'];
+const authRoutes = ['/logowanie', '/rejestracja'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -21,7 +21,7 @@ export function middleware(request: NextRequest) {
 
   // Redirect to login if trying to access protected route without token
   if (isProtectedRoute && !token) {
-    const url = new URL('/login', request.url);
+    const url = new URL('/logowanie', request.url);
     url.searchParams.set('redirect', pathname);
     return NextResponse.redirect(url);
   }
