@@ -7,7 +7,7 @@ const config: Config = {
     "./components/**/*.{ts,tsx}",
     "./lib/**/*.{ts,tsx}",
     // jeśli będziesz używać współdzielonych pakietów z UI:
-    // "../../packages/**/*.{ts,tsx}",
+    "../../packages/**/*.{ts,tsx}",
   ],
   theme: {
     container: {
