@@ -195,7 +195,7 @@ export default function AddListingPage() {
                   <SelectTrigger id="province" className="w-full">
                     <SelectValue placeholder="Wybierz województwo" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="overflow-y-auto max-h-[10rem]">
                     {provinces.map((province) => (
                       <SelectItem key={province} value={province}>
                         {province}
