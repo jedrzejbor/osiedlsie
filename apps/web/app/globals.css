@@ -121,3 +121,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Fix shadcn mobile scroll-lock adding extra margin */
+body[data-scroll-locked].antialiased {
+  margin-right: 0 !important;
+}
