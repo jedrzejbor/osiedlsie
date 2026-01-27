@@ -65,37 +65,37 @@ class ListingsService {
   }
 
   async getMyListings(): Promise<Listing[]> {
-    const response = await apiClient.get<Listing[]>("/listings/my/all");
+    const response = await apiClient.get<Listing[]>("/listings/my/all", true);
     return response.data;
   }
 
   async create(data: CreateListingData): Promise<Listing> {
-    const response = await apiClient.post<Listing>("/listings", data);
+    const response = await apiClient.post<Listing>("/listings", data, true);
     return response.data;
   }
 
   async update(id: string, data: UpdateListingData): Promise<Listing> {
-    const response = await apiClient.put<Listing>(`/listings/${id}`, data);
+    const response = await apiClient.put<Listing>(`/listings/${id}`, data, true);
     return response.data;
   }
 
   async publish(id: string): Promise<Listing> {
-    const response = await apiClient.post<Listing>(`/listings/${id}/publish`);
+    const response = await apiClient.post<Listing>(`/listings/${id}/publish`, {}, true);
     return response.data;
   }
 
   async unpublish(id: string): Promise<Listing> {
-    const response = await apiClient.post<Listing>(`/listings/${id}/unpublish`);
+    const response = await apiClient.post<Listing>(`/listings/${id}/unpublish`, {}, true);
     return response.data;
   }
 
   async archive(id: string): Promise<Listing> {
-    const response = await apiClient.post<Listing>(`/listings/${id}/archive`);
+    const response = await apiClient.post<Listing>(`/listings/${id}/archive`, {}, true);
     return response.data;
   }
 
   async delete(id: string): Promise<void> {
-    await apiClient.delete(`/listings/${id}`);
+    await apiClient.delete(`/listings/${id}`, true);
   }
 
   // Zdjęcia
@@ -111,11 +111,7 @@ class ListingsService {
     const response = await apiClient.post<ListingImage[]>(
       "/listings/images/upload",
       formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      true
     );
     return response.data;
   }
@@ -137,21 +133,17 @@ class ListingsService {
     const response = await apiClient.post<ListingImage>(
       "/listings/images/upload-single",
       formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      true
     );
     return response.data;
   }
 
   async deleteImage(imageId: string): Promise<void> {
-    await apiClient.delete(`/listings/images/${imageId}`);
+    await apiClient.delete(`/listings/images/${imageId}`, true);
   }
 
   async reorderImages(listingId: string, imageIds: string[]): Promise<void> {
-    await apiClient.post(`/listings/${listingId}/images/reorder`, { imageIds });
+    await apiClient.post(`/listings/${listingId}/images/reorder`, { imageIds }, true);
   }
 }
 
