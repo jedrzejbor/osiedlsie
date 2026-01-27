@@ -18,10 +18,13 @@ class ApiClient {
   ): Promise<T> {
     const { requiresAuth = false, headers = {}, ...restOptions } = options;
 
+    const isFormData = restOptions.body instanceof FormData;
+    
     const config: RequestInit = {
       ...restOptions,
       headers: {
-        'Content-Type': 'application/json',
+        // Don't set Content-Type for FormData - browser will set it with boundary
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         ...headers,
       },
     };
@@ -84,12 +87,16 @@ class ApiClient {
   async post<T>(
     endpoint: string,
     data?: any,
-    requiresAuth = false
+    requiresAuth = false,
+    options?: { headers?: Record<string, string>; isFormData?: boolean }
   ): Promise<T> {
+    const isFormData = data instanceof FormData || options?.isFormData;
+    
     return this.request<T>(endpoint, {
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
+      body: isFormData ? data : data ? JSON.stringify(data) : undefined,
       requiresAuth,
+      headers: isFormData ? {} : options?.headers, // Let browser set Content-Type for FormData
     });
   }
 
