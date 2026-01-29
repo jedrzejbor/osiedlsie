@@ -1,50 +1,58 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Card } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { useAuth } from "@/contexts/auth-context";
+import { listingsService, type Listing } from "@/lib/services/listings.service";
 
-// Mockowane dane użytkownika – później podmienimy na dane z API/auth
-const mockUser = {
-  name: "Jan Kowalski",
-  email: "jan.kowalski@example.com",
-  createdAtLabel: "Z nami od listopada 2025",
+// Mapowanie statusów z backendu na UI
+type UIStatus = "ACTIVE" | "DRAFT" | "ARCHIVED";
+
+const backendToUIStatus: Record<string, UIStatus> = {
+  published: "ACTIVE",
+  draft: "DRAFT",
+  archived: "ARCHIVED",
 };
 
-// Mockowane ogłoszenia użytkownika
-const mockMyListings = [
-  {
-    id: 1,
-    title: "Siedlisko pod lasem, 1.2 ha, strumyk na działce",
-    location: "Podkarpackie, pow. sanocki",
-    status: "ACTIVE" as const,
-    createdAtLabel: "Dodano: 3 dni temu",
-    views: 128,
-    expiresAtLabel: "Wygasa za 27 dni",
-  },
-  {
-    id: 2,
-    title: "Działka pod siedlisko przy ścianie lasu",
-    location: "Warmińsko-Mazurskie, okolice Mrągowa",
-    status: "DRAFT" as const,
-    createdAtLabel: "Utworzono: wczoraj",
-    views: 0,
-    expiresAtLabel: undefined,
-  },
-  {
-    id: 3,
-    title: "Stare siedlisko do remontu, pagórkowaty teren",
-    location: "Lubelskie, Roztocze",
-    status: "EXPIRED" as const,
-    createdAtLabel: "Dodano: 2 miesiące temu",
-    views: 412,
-    expiresAtLabel: "Ogłoszenie wygasło",
-  },
-];
+// Mapowanie województw
+const wojewodztwoLabels: Record<string, string> = {
+  dolnośląskie: "Dolnośląskie",
+  "kujawsko-pomorskie": "Kujawsko-Pomorskie",
+  lubelskie: "Lubelskie",
+  lubuskie: "Lubuskie",
+  łódzkie: "Łódzkie",
+  małopolskie: "Małopolskie",
+  mazowieckie: "Mazowieckie",
+  opolskie: "Opolskie",
+  podkarpackie: "Podkarpackie",
+  podlaskie: "Podlaskie",
+  pomorskie: "Pomorskie",
+  śląskie: "Śląskie",
+  świętokrzyskie: "Świętokrzyskie",
+  "warmińsko-mazurskie": "Warmińsko-Mazurskie",
+  wielkopolskie: "Wielkopolskie",
+  zachodniopomorskie: "Zachodniopomorskie",
+};
 
-function getStatusBadge(status: "ACTIVE" | "DRAFT" | "EXPIRED") {
+// Formatowanie daty
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "dzisiaj";
+  if (diffDays === 1) return "wczoraj";
+  if (diffDays < 7) return `${diffDays} dni temu`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} tyg. temu`;
+  return date.toLocaleDateString("pl-PL");
+};
+
+function getStatusBadge(status: UIStatus) {
   switch (status) {
     case "ACTIVE":
       return (
@@ -58,10 +66,10 @@ function getStatusBadge(status: "ACTIVE" | "DRAFT" | "EXPIRED") {
           Szkic
         </Badge>
       );
-    case "EXPIRED":
+    case "ARCHIVED":
       return (
         <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-100">
-          Wygasło
+          Zarchiwizowane
         </Badge>
       );
     default:
@@ -114,6 +122,68 @@ function UserInfo() {
 }
 
 export default function AccountDashboardPage() {
+  const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth();
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | UIStatus>("all");
+
+  // Redirect jeśli niezalogowany
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/logowanie?redirect=/konto");
+    }
+  }, [user, authLoading, router]);
+
+  // Fetch moich ogłoszeń
+  useEffect(() => {
+    const fetchMyListings = async () => {
+      if (!user) return;
+      
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await listingsService.getMyListings();
+        setListings(data);
+      } catch (err: any) {
+        console.error("Błąd pobierania ogłoszeń:", err);
+        setError(err.response?.data?.message || "Nie udało się pobrać ogłoszeń");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchMyListings();
+    }
+  }, [user]);
+
+  // Filtrowanie ogłoszeń
+  const filteredListings = listings.filter((listing) => {
+    if (statusFilter === "all") return true;
+    const uiStatus = backendToUIStatus[listing.status];
+    return uiStatus === statusFilter;
+  });
+
+  // Liczniki
+  const activeCount = listings.filter((l) => l.status === "published").length;
+  const draftCount = listings.filter((l) => l.status === "draft").length;
+  const archivedCount = listings.filter((l) => l.status === "archived").length;
+
+  // Loading state
+  if (authLoading) {
+    return (
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Ładowanie...</p>
+      </main>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <main className="min-h-screen bg-background">
       <section className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8">
@@ -157,10 +227,7 @@ export default function AccountDashboardPage() {
                     Aktywne
                   </p>
                   <p className="text-xl font-semibold">
-                    {
-                      mockMyListings.filter((l) => l.status === "ACTIVE")
-                        .length
-                    }
+                    {activeCount}
                   </p>
                 </div>
                 <div>
@@ -168,21 +235,15 @@ export default function AccountDashboardPage() {
                     Szkice
                   </p>
                   <p className="text-xl font-semibold">
-                    {
-                      mockMyListings.filter((l) => l.status === "DRAFT")
-                        .length
-                    }
+                    {draftCount}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">
-                    Wygasłe
+                    Zarchiwizowane
                   </p>
                   <p className="text-xl font-semibold">
-                    {
-                      mockMyListings.filter((l) => l.status === "EXPIRED")
-                        .length
-                    }
+                    {archivedCount}
                   </p>
                 </div>
               </div>
@@ -194,94 +255,127 @@ export default function AccountDashboardPage() {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-sm font-semibold">Moje ogłoszenia</h2>
 
-              {/* Na razie same "puste" filtry – tylko UI */}
+              {/* Filtry statusu */}
               <div className="flex flex-wrap gap-1 text-xs">
-                <Button variant="outline" size="sm">
-                  Wszystkie
+                <Button
+                  variant={statusFilter === "all" ? "outline" : "ghost"}
+                  size="sm"
+                  onClick={() => setStatusFilter("all")}
+                >
+                  Wszystkie ({listings.length})
                 </Button>
-                <Button variant="ghost" size="sm">
-                  Aktywne
+                <Button
+                  variant={statusFilter === "ACTIVE" ? "outline" : "ghost"}
+                  size="sm"
+                  onClick={() => setStatusFilter("ACTIVE")}
+                >
+                  Aktywne ({activeCount})
                 </Button>
-                <Button variant="ghost" size="sm">
-                  Szkice
+                <Button
+                  variant={statusFilter === "DRAFT" ? "outline" : "ghost"}
+                  size="sm"
+                  onClick={() => setStatusFilter("DRAFT")}
+                >
+                  Szkice ({draftCount})
                 </Button>
-                <Button variant="ghost" size="sm">
-                  Wygasłe
+                <Button
+                  variant={statusFilter === "ARCHIVED" ? "outline" : "ghost"}
+                  size="sm"
+                  onClick={() => setStatusFilter("ARCHIVED")}
+                >
+                  Archiwum ({archivedCount})
                 </Button>
               </div>
             </div>
 
-            <Card className="divide-y">
-              {mockMyListings.map((listing) => (
-                <div
-                  key={listing.id}
-                  className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Link
-                        href={`/ogloszenia/${listing.id}`}
-                        className="text-sm font-medium hover:underline"
-                      >
-                        {listing.title}
-                      </Link>
-                      {getStatusBadge(listing.status)}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {listing.location}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {listing.createdAtLabel}
-                      {listing.expiresAtLabel
-                        ? ` • ${listing.expiresAtLabel}`
-                        : ""}
-                    </p>
-                  </div>
+            {/* Loading */}
+            {isLoading && (
+              <Card className="p-4">
+                <p className="text-sm text-muted-foreground">Ładowanie ogłoszeń...</p>
+              </Card>
+            )}
 
-                  <div className="flex flex-col items-start gap-2 text-xs sm:items-end">
-                    <p className="text-muted-foreground">
-                      Wyświetlenia:{" "}
-                      <span className="font-semibold">
-                        {listing.views}
-                      </span>
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        asChild
-                        variant="outline"
-                        size="sm"
-                      >
-                        <Link href={`/ogloszenia/edytuj/${listing.id}`}>
-                          Edytuj
-                        </Link>
-                      </Button>
-                      <Button
-                        asChild
-                        variant="ghost"
-                        size="sm"
-                      >
-                        <Link href={`/ogloszenia/${listing.id}`}>
-                          Podgląd
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            {/* Error */}
+            {error && (
+              <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+                {error}
+              </div>
+            )}
 
-              {mockMyListings.length === 0 && (
-                <div className="p-4 text-sm text-muted-foreground">
-                  Nie masz jeszcze żadnych ogłoszeń.{" "}
-                  <Link
-                    href="/ogloszenia/dodaj"
-                    className="text-primary underline-offset-4 hover:underline"
-                  >
-                    Dodaj pierwsze ogłoszenie
-                  </Link>
-                  .
-                </div>
-              )}
-            </Card>
+            {/* Lista ogłoszeń */}
+            {!isLoading && !error && (
+              <Card className="divide-y">
+                {filteredListings.map((listing) => {
+                  const uiStatus = backendToUIStatus[listing.status];
+                  const province = listing.wojewodztwo
+                    ? wojewodztwoLabels[listing.wojewodztwo] || listing.wojewodztwo
+                    : "";
+                  const city = listing.city || "";
+                  const location = [province, city].filter(Boolean).join(", ");
+
+                  return (
+                    <div
+                      key={listing.id}
+                      className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Link
+                            href={`/ogloszenia/${listing.id}`}
+                            className="text-sm font-medium hover:underline"
+                          >
+                            {listing.title || "Bez tytułu"}
+                          </Link>
+                          {getStatusBadge(uiStatus)}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {location || "Lokalizacja nie podana"}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {listing.status === "draft"
+                            ? `Utworzono: ${formatDate(listing.createdAt)}`
+                            : `Dodano: ${formatDate(listing.publishedAt || listing.createdAt)}`}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col items-start gap-2 text-xs sm:items-end">
+                        <div className="flex flex-wrap gap-2">
+                          <Button asChild variant="outline" size="sm">
+                            <Link href={`/ogloszenia/edytuj/${listing.id}`}>
+                              Edytuj
+                            </Link>
+                          </Button>
+                          <Button asChild variant="ghost" size="sm">
+                            <Link href={`/ogloszenia/${listing.id}`}>
+                              Podgląd
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {filteredListings.length === 0 && !isLoading && (
+                  <div className="p-4 text-sm text-muted-foreground">
+                    {statusFilter === "all" ? (
+                      <>
+                        Nie masz jeszcze żadnych ogłoszeń.{" "}
+                        <Link
+                          href="/ogloszenia/dodaj"
+                          className="text-primary underline-offset-4 hover:underline"
+                        >
+                          Dodaj pierwsze ogłoszenie
+                        </Link>
+                        .
+                      </>
+                    ) : (
+                      `Brak ogłoszeń w tej kategorii.`
+                    )}
+                  </div>
+                )}
+              </Card>
+            )}
           </div>
         </div>
       </section>
